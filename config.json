@@ -1,0 +1,10 @@
+{
+    "sender_email": "youremail@example.com",
+    "password": "yourapppassword",
+    "smtp_server": "smtp.gmail.com",
+    "smtp_port": 587,
+    "receiver_emails": ["recipient1@example.com", "recipient2@example.com"],
+    "subject": "Weekly Data Report",
+    "send_time": "08:00"
+  }
+  
