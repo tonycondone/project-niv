@@ -91,11 +91,33 @@ python3 main.py --mode web
 ```
 
 ### 🧪 Demo & Examples
+
+#### 🚀 One-Time Run Script (Recommended for Beginners)
+The `run_once.py` script is the easiest way to get started:
+
 ```bash
-# Run comprehensive demo
+# Process any CSV file with web dashboard
+python3 run_once.py --csv your_data.csv --web
+
+# Interactive guided mode
+python3 run_once.py --interactive
+
+# Process with filters and transformations
+python3 run_once.py --csv your_data.csv \
+  --filters '{"Sales": {"min": 1000, "max": 5000}}' \
+  --transformations normalize standardize \
+  --web
+```
+
+#### 📚 Learning Examples
+```bash
+# Quick start examples
+python3 quick_start.py
+
+# Comprehensive demo
 python3 demo_etl.py
 
-# Run usage examples
+# Advanced usage examples
 python3 example_usage.py
 ```
 
@@ -123,6 +145,8 @@ project_niv/
 │   ├── email_utils.py               # Email functionality
 │   └── scheduler.py                 # Automated scheduling
 ├── 🧪 Demo & Examples
+│   ├── run_once.py                  # One-time processing script
+│   ├── quick_start.py               # Quick start examples
 │   ├── demo_etl.py                  # Comprehensive demo
 │   └── example_usage.py             # Usage examples
 ├── ⚙️ Configuration
