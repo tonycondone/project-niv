@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ subject }}</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f4f4f4;
+        }
+        .container {
+            background-color: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 0 20px rgba(0,0,0,0.1);
+        }
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 30px;
+            text-align: center;
+        }
+        .header h1 {
+            margin: 0;
+            font-size: 28px;
+        }
+        .content {
+            margin-bottom: 30px;
+        }
+        .summary-section {
+            background-color: #f8f9fa;
+            padding: 20px;
+            border-radius: 8px;
+            border-left: 4px solid #667eea;
+            margin: 20px 0;
+        }
+        .summary-section h3 {
+            margin-top: 0;
+            color: #667eea;
+        }
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin: 20px 0;
+        }
+        .stat-card {
+            background-color: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            text-align: center;
+        }
+        .stat-value {
+            font-size: 24px;
+            font-weight: bold;
+            color: #667eea;
+        }
+        .stat-label {
+            color: #666;
+            font-size: 14px;
+            margin-top: 5px;
+        }
+        .footer {
+            text-align: center;
+            color: #666;
+            font-size: 14px;
+            margin-top: 30px;
+            padding-top: 20px;
+            border-top: 1px solid #eee;
+        }
+        .attachment-info {
+            background-color: #e3f2fd;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 20px 0;
+        }
+        .attachment-info h4 {
+            margin-top: 0;
+            color: #1976d2;
+        }
+        pre {
+            background-color: #f5f5f5;
+            padding: 15px;
+            border-radius: 5px;
+            overflow-x: auto;
+            font-size: 12px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>📊 {{ subject }}</h1>
+            <p>Generated on {{ report_date }}</p>
+        </div>
+        
+        <div class="content">
+            <p>Hello,</p>
+            <p>Please find attached your weekly data analysis report. Below is a summary of the key findings:</p>
+            
+            {% if summary_stats %}
+            <div class="stats-grid">
+                {% for stat in summary_stats %}
+                <div class="stat-card">
+                    <div class="stat-value">{{ stat.value }}</div>
+                    <div class="stat-label">{{ stat.label }}</div>
+                </div>
+                {% endfor %}
+            </div>
+            {% endif %}
+            
+            <div class="summary-section">
+                <h3>📈 Data Summary</h3>
+                <pre>{{ summary_text }}</pre>
+            </div>
+            
+            {% if chart_path %}
+            <div class="attachment-info">
+                <h4>📎 Attachments</h4>
+                <ul>
+                    <li><strong>Excel Report:</strong> Complete data analysis with detailed breakdowns</li>
+                    <li><strong>Chart:</strong> Visual representation of key trends</li>
+                </ul>
+            </div>
+            {% endif %}
+            
+            <p>If you have any questions about this report, please don't hesitate to reach out.</p>
+        </div>
+        
+        <div class="footer">
+            <p>Best regards,<br><strong>PROJECT NIV - Automated Reporting System</strong></p>
+            <p><em>This is an automated report generated on {{ report_date }}</em></p>
+        </div>
+    </div>
+</body>
+</html>
