@@ -2,3 +2,7 @@ pandas
 matplotlib
 jinja2
 schedule
+streamlit
+sqlalchemy
+openpyxl
+python-dotenv
