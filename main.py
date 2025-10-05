@@ -44,7 +44,7 @@ def main():
                 return
         
         # Initialize ETL processor
-        etl = ETLProcessor()
+        etl = ETLProcessor(data_dir=".")
         
         try:
             # Run ETL process

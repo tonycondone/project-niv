@@ -43,7 +43,11 @@ class ETLProcessor:
             Raw DataFrame
         """
         try:
-            file_path = os.path.join(self.data_dir, csv_file)
+            # Handle both relative and absolute paths
+            if os.path.isabs(csv_file) or csv_file.startswith('./') or csv_file.startswith('../'):
+                file_path = csv_file
+            else:
+                file_path = os.path.join(self.data_dir, csv_file)
             logger.info(f"Extracting data from {file_path}")
             
             # Try different encodings
