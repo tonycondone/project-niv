@@ -10,32 +10,69 @@ PROJECT NIV automates the generation and delivery of data analysis reports via e
 - 🔌 Works with CSV, Excel files
 - 🔒 Secure SMTP login using app password
 - 🔮 **Prescience Analytics** - Predictive insights and trend forecasting
+- 🔄 **ETL Process** - Extract, Transform, Load with advanced filtering
+- 📈 **ApexCharts.js Integration** - Interactive web-based visualizations
+- 🌐 **Web Dashboard** - Real-time data visualization interface
 
 ## 🚀 How It Works
 
+### Legacy Mode (Original)
 1. Place data in `/data/sample.csv`
 2. Configure `config.json` (email, time, recipients)
 3. Run:
 
     ```bash
-    python main.py         # One-time run
-    python scheduler.py    # Scheduled automation
+    python main.py --mode legacy    # One-time run
+    python scheduler.py             # Scheduled automation
     ```
+
+### ETL Mode (New)
+1. Place data in `/data/sample.csv` or any CSV file
+2. Run ETL process with filtering and transformations:
+
+    ```bash
+    # Basic ETL
+    python main.py --mode etl --csv sample.csv
+    
+    # ETL with filters
+    python main.py --mode etl --csv sample.csv --filters '{"Sales": {"min": 1000, "max": 5000}}'
+    
+    # ETL with transformations
+    python main.py --mode etl --csv sample.csv --transformations normalize standardize
+    ```
+
+### Web Dashboard Mode
+1. Run the web server:
+
+    ```bash
+    python main.py --mode web
+    ```
+
+2. Open your browser to `http://localhost:5000`
+3. View interactive ApexCharts.js visualizations
 
 ## 📁 Folder Structure
 
 ```plaintext
 project_niv/
-├── data/             # Source CSV or Excel files
-├── reports/          # Auto-generated reports/charts
-├── templates/        # (Optional) HTML email templates
-├── logs/             # Error or activity logs
-├── main.py           # Main runner script
-├── scheduler.py      # Auto-send scheduler
-├── email_utils.py    # Handles email formatting + sending
-├── data_processor.py # Reads and analyzes data
-├── config.json       # Email settings + schedule
-└── README.md         # This file
+├── data/                    # Source CSV or Excel files
+│   ├── sample.csv          # Basic sample data
+│   └── sample_detailed.csv # Detailed sample data
+├── reports/                 # Auto-generated reports/charts
+│   ├── charts/             # ApexCharts.js configurations
+│   └── data/               # Processed data files
+├── templates/              # HTML templates
+│   └── chart_template.html # ApexCharts.js dashboard
+├── logs/                   # Error or activity logs
+├── main.py                 # Main runner script (enhanced)
+├── scheduler.py            # Auto-send scheduler
+├── email_utils.py          # Handles email formatting + sending
+├── data_processor.py       # Legacy data processor
+├── etl_processor.py        # New ETL processor
+├── web_server.py           # Flask web server
+├── demo_etl.py            # ETL demonstration script
+├── config.json            # Email settings + schedule
+└── README.md              # This file
 ```
 
 ## 📦 Requirements
@@ -66,6 +103,34 @@ pip install -r requirements.txt
 
 - Sales analysts receive automated weekly reports with updated sales summaries and charts.
 - Managers get a Monday 8 AM email with insights—without writing any code.
+
+## 🔄 ETL Process & ApexCharts.js Integration
+
+PROJECT NIV now features a comprehensive ETL (Extract, Transform, Load) process with interactive ApexCharts.js visualizations:
+
+### ETL Capabilities
+
+- **Data Extraction**: Support for CSV files with automatic encoding detection
+- **Advanced Filtering**: Range filters, value filters, and custom conditions
+- **Data Transformations**: Normalization, standardization, and log transformation
+- **Data Cleaning**: Duplicate removal, missing value handling, and type conversion
+- **Multiple Output Formats**: Excel, CSV, JSON for different use cases
+
+### ApexCharts.js Visualizations
+
+- 📈 **Line Charts**: Time series and trend analysis
+- 📊 **Bar Charts**: Comparative data visualization
+- 📈 **Area Charts**: Filled trend representations
+- 🥧 **Pie Charts**: Data distribution and proportions
+- 📊 **Scatter Plots**: Correlation and relationship analysis
+
+### Web Dashboard Features
+
+- 🌐 **Interactive Interface**: Real-time data visualization
+- 🔄 **Flow Chart**: Visual ETL process representation
+- 📱 **Responsive Design**: Works on desktop and mobile
+- 💾 **Data Export**: Download processed data and configurations
+- 🔄 **Real-time Updates**: Live data refresh capabilities
 
 ## 🔮 Prescience Analytics
 

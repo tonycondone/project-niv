@@ -1,0 +1,21 @@
+Date,Product,Category,Sales,Quantity,Region,Profit
+2024-01-01,Widget A,Electronics,1500,10,North,300
+2024-01-02,Widget B,Electronics,2200,15,South,440
+2024-01-03,Gadget X,Electronics,1800,12,East,360
+2024-01-04,Tool Y,Hardware,1200,8,West,240
+2024-01-05,Widget A,Electronics,1600,11,North,320
+2024-01-06,Gadget Z,Electronics,2500,18,South,500
+2024-01-07,Tool X,Hardware,900,6,East,180
+2024-01-08,Widget C,Electronics,1900,13,West,380
+2024-01-09,Gadget Y,Electronics,2100,14,North,420
+2024-01-10,Tool Z,Hardware,1100,7,South,220
+2024-01-11,Widget B,Electronics,2300,16,East,460
+2024-01-12,Gadget A,Electronics,1700,12,West,340
+2024-01-13,Tool A,Hardware,1300,9,North,260
+2024-01-14,Widget X,Electronics,2000,14,South,400
+2024-01-15,Gadget B,Electronics,2400,17,East,480
+2024-01-16,Tool B,Hardware,1000,6,West,200
+2024-01-17,Widget Y,Electronics,1800,13,North,360
+2024-01-18,Gadget C,Electronics,2200,15,South,440
+2024-01-19,Tool C,Hardware,1400,10,East,280
+2024-01-20,Widget Z,Electronics,2600,19,West,520

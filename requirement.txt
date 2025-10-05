@@ -2,3 +2,6 @@ pandas
 matplotlib
 jinja2
 schedule
+flask
+numpy
+openpyxl
