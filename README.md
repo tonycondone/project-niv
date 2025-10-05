@@ -19,6 +19,22 @@
 
 ---
 
+## 📋 Table of Contents
+
+- [🎯 What is PROJECT NIV?](#-what-is-project-niv)
+- [🚀 Quick Start](#-quick-start)
+- [🔧 Features](#-features)
+- [💼 Use Cases](#-use-cases)
+- [📁 Project Structure](#-project-structure)
+- [📦 Installation](#-installation)
+- [🚀 Usage Examples](#-usage-examples)
+- [🔧 Configuration](#-configuration)
+- [📈 Performance](#-performance)
+- [🛠️ Development](#️-development)
+- [📞 Support](#-support)
+
+---
+
 ## 🎯 What is PROJECT NIV?
 
 **PROJECT NIV** is a comprehensive data analysis platform that transforms raw CSV files into professional interactive visualizations. Built for data analysts, business intelligence professionals, and developers, it provides a complete ETL (Extract, Transform, Load) pipeline with stunning ApexCharts.js visualizations.
@@ -38,13 +54,7 @@
 
 ## 🚀 Quick Start
 
-<div align="center">
-
-### Get started in under 60 seconds! ⚡
-
-</div>
-
-### 🎯 One-Command Processing
+### ⚡ One-Command Processing
 
 ```bash
 # Clone and process any CSV file instantly
@@ -373,6 +383,68 @@ pip install -r requirement.txt
 
 ---
 
+## 📁 Project Structure
+
+```
+project_niv/
+├── 📁 data/                          # 📊 Data sources
+│   ├── sample.csv                   # Basic sample data
+│   └── sample_detailed.csv          # Enhanced sample data
+├── 📁 reports/                       # 📈 Generated outputs
+│   ├── *.xlsx                       # Excel reports
+│   ├── *.json                       # JSON data exports
+│   └── *.png                        # Chart images
+├── 📁 templates/                     # 🎨 Web templates
+│   └── chart_template.html          # ApexCharts.js dashboard
+├── 🐍 Core Scripts
+│   ├── run_once.py                  # ⚡ One-time processing
+│   ├── main.py                      # 🔧 Multi-mode main script
+│   ├── etl_processor.py             # 🔄 ETL processing engine
+│   ├── web_server.py                # 🌐 Flask web server
+│   └── install.py                   # 📦 Installation script
+├── 🧪 Demo & Examples
+│   ├── demo_etl.py                  # 📊 Comprehensive demo
+│   ├── quick_start.py               # 🚀 Quick start examples
+│   └── example_usage.py             # 💡 Usage patterns
+└── 📖 Documentation
+    ├── README.md                    # 📚 This file
+    └── STEP_BY_STEP_GUIDE.md        # 📖 Complete tutorial
+```
+
+---
+
+## 📦 Installation
+
+### 🐍 Python Libraries
+
+| Library | Purpose | Version |
+|---------|---------|---------|
+| **pandas** | Data manipulation and analysis | 1.3+ |
+| **numpy** | Numerical computing | 1.20+ |
+| **matplotlib** | Static chart generation | 3.3+ |
+| **flask** | Web server framework | 2.0+ |
+| **openpyxl** | Excel file handling | 3.0+ |
+| **jinja2** | Template engine | 3.0+ |
+| **schedule** | Task scheduling | 1.1+ |
+
+### 🌐 External Dependencies
+
+- **ApexCharts.js** - Interactive charting library (CDN)
+- **Mermaid.js** - Flow chart generation (CDN)
+- **Bootstrap** - Responsive UI framework (CDN)
+
+### 🚀 Installation Commands
+
+```bash
+# Automatic installation (Recommended)
+pip install -r requirement.txt
+
+# Or install individually
+pip install pandas numpy matplotlib flask openpyxl jinja2 schedule
+```
+
+---
+
 ## 🚀 Usage Examples
 
 ### ⚡ One-Time Processing
@@ -426,68 +498,6 @@ python3 example_usage.py
 
 ---
 
-## 📁 Project Structure
-
-```
-project_niv/
-├── 📁 data/                          # 📊 Data sources
-│   ├── sample.csv                   # Basic sample data
-│   └── sample_detailed.csv          # Enhanced sample data
-├── 📁 reports/                       # 📈 Generated outputs
-│   ├── *.xlsx                       # Excel reports
-│   ├── *.json                       # JSON data exports
-│   └── *.png                        # Chart images
-├── 📁 templates/                     # 🎨 Web templates
-│   └── chart_template.html          # ApexCharts.js dashboard
-├── 🐍 Core Scripts
-│   ├── run_once.py                  # ⚡ One-time processing
-│   ├── main.py                      # 🔧 Multi-mode main script
-│   ├── etl_processor.py             # 🔄 ETL processing engine
-│   ├── web_server.py                # 🌐 Flask web server
-│   └── install.py                   # 📦 Installation script
-├── 🧪 Demo & Examples
-│   ├── demo_etl.py                  # 📊 Comprehensive demo
-│   ├── quick_start.py               # 🚀 Quick start examples
-│   └── example_usage.py             # 💡 Usage patterns
-└── 📖 Documentation
-    ├── README.md                    # 📚 This file
-    └── STEP_BY_STEP_GUIDE.md        # 📖 Complete tutorial
-```
-
----
-
-## 📦 Dependencies
-
-### 🐍 Python Libraries
-
-| Library | Purpose | Version |
-|---------|---------|---------|
-| **pandas** | Data manipulation and analysis | 1.3+ |
-| **numpy** | Numerical computing | 1.20+ |
-| **matplotlib** | Static chart generation | 3.3+ |
-| **flask** | Web server framework | 2.0+ |
-| **openpyxl** | Excel file handling | 3.0+ |
-| **jinja2** | Template engine | 3.0+ |
-| **schedule** | Task scheduling | 1.1+ |
-
-### 🌐 External Dependencies
-
-- **ApexCharts.js** - Interactive charting library (CDN)
-- **Mermaid.js** - Flow chart generation (CDN)
-- **Bootstrap** - Responsive UI framework (CDN)
-
-### 🚀 Installation
-
-```bash
-# Automatic installation (Recommended)
-pip install -r requirement.txt
-
-# Or install individually
-pip install pandas numpy matplotlib flask openpyxl jinja2 schedule
-```
-
----
-
 ## 🔧 Configuration
 
 ### 📧 Email Configuration (Optional)
@@ -529,7 +539,7 @@ pip install pandas numpy matplotlib flask openpyxl jinja2 schedule
 
 ---
 
-## 📈 Performance & Scalability
+## 📈 Performance
 
 ### ⚡ Processing Speed
 
@@ -547,7 +557,7 @@ pip install pandas numpy matplotlib flask openpyxl jinja2 schedule
 
 ---
 
-## 🛠️ Development & Contributing
+## 🛠️ Development
 
 ### 🐍 Tech Stack
 
@@ -581,7 +591,7 @@ python3 quick_start.py
 
 ---
 
-## 📞 Support & Documentation
+## 📞 Support
 
 ### 📚 Resources
 
