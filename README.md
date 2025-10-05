@@ -9,6 +9,7 @@ PROJECT NIV automates the generation and delivery of data analysis reports via e
 - ⏰ Weekly scheduling (e.g., every Monday 08:00 AM)
 - 🔌 Works with CSV, Excel files
 - 🔒 Secure SMTP login using app password
+- 🔮 **Prescience Analytics** - Predictive insights and trend forecasting
 
 ## 🚀 How It Works
 
@@ -66,11 +67,31 @@ pip install -r requirements.txt
 - Sales analysts receive automated weekly reports with updated sales summaries and charts.
 - Managers get a Monday 8 AM email with insights—without writing any code.
 
+## 🔮 Prescience Analytics
+
+PROJECT NIV now includes advanced prescience capabilities that provide:
+
+- **Predictive Modeling**: Forecast future trends based on historical data patterns
+- **Anomaly Detection**: Automatically identify unusual patterns or outliers in your data
+- **Trend Analysis**: Generate forward-looking insights and recommendations
+- **Risk Assessment**: Evaluate potential risks and opportunities in your datasets
+- **Seasonal Forecasting**: Account for seasonal patterns and cyclical trends
+
+### Prescience Features
+
+- 📈 **Trend Forecasting**: Predict future values using time series analysis
+- 🎯 **Pattern Recognition**: Identify recurring patterns and correlations
+- ⚠️ **Alert System**: Get notified when data deviates from expected patterns
+- 📊 **Confidence Intervals**: Statistical confidence levels for all predictions
+- 🔍 **Root Cause Analysis**: Understand the factors driving your predictions
+
 ## 📌 Future Improvements
 
 - Web UI (Streamlit)
 - Database logging
 - HTML-based email reports
+- Enhanced prescience algorithms
+- Real-time prediction updates
 
 ---
 
@@ -88,6 +109,7 @@ PROJECT NIV is a Python-based automation tool designed to streamline the reporti
 - **Email Delivery**: Sends reports with summaries, attached Excel files, and optional charts.
 - **Configurable Scheduling**: Set up automated email delivery (e.g., every Monday at 08:00 AM).
 - **Secure SMTP Integration**: Supports Gmail, Outlook, and other email providers with app passwords.
+- **Prescience Analytics**: Advanced predictive modeling and trend forecasting capabilities.
 - **Modular Design**: Built for scalability with future UI and database integration in mind.
 
 ### Impact
