@@ -3,7 +3,7 @@ Web Server for ETL Data Visualization
 Serves ApexCharts.js visualizations and provides API endpoints
 """
 
-from flask import Flask, render_template, jsonify, request, send_file
+from flask import Flask, render_template, jsonify, request, send_file, send_from_directory
 import json
 import os
 from etl_processor import ETLProcessor
@@ -13,23 +13,40 @@ import logging
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
-app = Flask(__name__)
+app = Flask(__name__, static_folder='static')
 
 # Global ETL processor instance
-etl_processor = ETLProcessor()
+etl_processor = ETLProcessor(data_dir='.')
 
 @app.route('/')
 def index():
     """Main dashboard page"""
     return render_template('chart_template.html')
 
+@app.route('/static/<path:filename>')
+def static_files(filename):
+    """Serve static files"""
+    return send_from_directory('static', filename)
+
 @app.route('/api/etl-data')
 def get_etl_data():
     """API endpoint to get ETL data"""
     try:
-        # Check if we have processed data
+        # Check if we have processed data, if not try to load sample data
         if etl_processor.filtered_data is None:
-            return jsonify({'error': 'No ETL data available. Please run ETL process first.'}), 400
+            # Try to load sample data automatically
+            try:
+                sample_files = ['data/sample_detailed.csv', 'data/sample.csv', 'sample_detailed.csv', 'sample.csv']
+                for sample_file in sample_files:
+                    if os.path.exists(sample_file):
+                        logger.info(f"Auto-loading sample data from {sample_file}")
+                        etl_processor.run_full_etl(sample_file)
+                        break
+                else:
+                    return jsonify({'error': 'No ETL data available and no sample data found. Please run ETL process first.'}), 400
+            except Exception as e:
+                logger.error(f"Error auto-loading sample data: {str(e)}")
+                return jsonify({'error': 'No ETL data available. Please run ETL process first.'}), 400
         
         # Generate chart configurations
         chart_configs = {}
