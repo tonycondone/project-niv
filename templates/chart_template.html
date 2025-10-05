@@ -1,0 +1,348 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ETL Data Visualization - PROJECT NIV</title>
+    
+    <!-- ApexCharts.js CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/apexcharts@latest"></script>
+    
+    <!-- Flow Chart Library -->
+    <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+    
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            padding: 30px;
+        }
+        
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 2px solid #e0e0e0;
+        }
+        
+        .header h1 {
+            color: #333;
+            margin: 0;
+            font-size: 2.5em;
+        }
+        
+        .header p {
+            color: #666;
+            margin: 10px 0 0 0;
+            font-size: 1.1em;
+        }
+        
+        .chart-container {
+            margin: 30px 0;
+            padding: 20px;
+            border: 1px solid #e0e0e0;
+            border-radius: 8px;
+            background: #fafafa;
+        }
+        
+        .chart-title {
+            font-size: 1.3em;
+            font-weight: bold;
+            margin-bottom: 15px;
+            color: #333;
+        }
+        
+        .flow-chart {
+            margin: 30px 0;
+            padding: 20px;
+            border: 1px solid #e0e0e0;
+            border-radius: 8px;
+            background: #fafafa;
+        }
+        
+        .etl-summary {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin: 30px 0;
+        }
+        
+        .summary-card {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px;
+            border-radius: 8px;
+            text-align: center;
+        }
+        
+        .summary-card h3 {
+            margin: 0 0 10px 0;
+            font-size: 1.1em;
+        }
+        
+        .summary-card .value {
+            font-size: 2em;
+            font-weight: bold;
+            margin: 0;
+        }
+        
+        .chart-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(500px, 1fr));
+            gap: 20px;
+            margin: 20px 0;
+        }
+        
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: #666;
+        }
+        
+        .error {
+            background: #ffebee;
+            color: #c62828;
+            padding: 15px;
+            border-radius: 4px;
+            margin: 10px 0;
+        }
+        
+        .controls {
+            margin: 20px 0;
+            text-align: center;
+        }
+        
+        .btn {
+            background: #667eea;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 0 10px;
+            font-size: 1em;
+        }
+        
+        .btn:hover {
+            background: #5a6fd8;
+        }
+        
+        .hidden {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>📊 ETL Data Visualization</h1>
+            <p>Interactive charts powered by ApexCharts.js</p>
+        </div>
+        
+        <div class="etl-summary" id="summary">
+            <div class="summary-card">
+                <h3>Original Rows</h3>
+                <p class="value" id="original-rows">-</p>
+            </div>
+            <div class="summary-card">
+                <h3>Processed Rows</h3>
+                <p class="value" id="processed-rows">-</p>
+            </div>
+            <div class="summary-card">
+                <h3>Columns</h3>
+                <p class="value" id="columns">-</p>
+            </div>
+            <div class="summary-card">
+                <h3>Charts Generated</h3>
+                <p class="value" id="charts-count">-</p>
+            </div>
+        </div>
+        
+        <div class="controls">
+            <button class="btn" onclick="refreshCharts()">🔄 Refresh Charts</button>
+            <button class="btn" onclick="exportData()">📥 Export Data</button>
+            <button class="btn" onclick="toggleFlowChart()">🔄 Toggle Flow Chart</button>
+        </div>
+        
+        <div class="flow-chart hidden" id="flow-chart-container">
+            <div class="chart-title">ETL Process Flow</div>
+            <div id="flow-chart" class="mermaid">
+                graph TD
+                    A[Extract Data] --> B[Filter Data]
+                    B --> C[Transform Data]
+                    C --> D[Generate Visualizations]
+                    C --> E[Save Output Files]
+                    D --> F[Display Charts]
+                    E --> F
+            </div>
+        </div>
+        
+        <div class="chart-grid" id="charts-container">
+            <div class="loading">Loading charts...</div>
+        </div>
+    </div>
+
+    <script>
+        // Global variables
+        let chartInstances = [];
+        let etlData = null;
+        
+        // Initialize Mermaid
+        mermaid.initialize({ 
+            startOnLoad: true,
+            theme: 'default',
+            flowchart: {
+                useMaxWidth: true,
+                htmlLabels: true
+            }
+        });
+        
+        // Load ETL data and initialize charts
+        async function loadETLData() {
+            try {
+                const response = await fetch('/api/etl-data');
+                if (!response.ok) {
+                    throw new Error('Failed to load ETL data');
+                }
+                etlData = await response.json();
+                updateSummary(etlData.summary);
+                generateCharts(etlData.chart_configs);
+                updateFlowChart(etlData.flow_data);
+            } catch (error) {
+                console.error('Error loading ETL data:', error);
+                showError('Failed to load ETL data: ' + error.message);
+            }
+        }
+        
+        // Update summary cards
+        function updateSummary(summary) {
+            document.getElementById('original-rows').textContent = summary.original_rows || 0;
+            document.getElementById('processed-rows').textContent = summary.processed_rows || 0;
+            document.getElementById('columns').textContent = summary.columns || 0;
+            document.getElementById('charts-count').textContent = Object.keys(etlData.chart_configs || {}).length;
+        }
+        
+        // Generate all charts
+        function generateCharts(chartConfigs) {
+            const container = document.getElementById('charts-container');
+            container.innerHTML = '';
+            
+            if (!chartConfigs || Object.keys(chartConfigs).length === 0) {
+                container.innerHTML = '<div class="error">No chart configurations available</div>';
+                return;
+            }
+            
+            Object.entries(chartConfigs).forEach(([chartType, config]) => {
+                const chartDiv = document.createElement('div');
+                chartDiv.className = 'chart-container';
+                chartDiv.innerHTML = `
+                    <div class="chart-title">${config.title?.text || chartType.charAt(0).toUpperCase() + chartType.slice(1)} Chart</div>
+                    <div id="chart-${chartType}"></div>
+                `;
+                container.appendChild(chartDiv);
+                
+                // Create ApexCharts instance
+                const chart = new ApexCharts(document.querySelector(`#chart-${chartType}`), config);
+                chartInstances.push(chart);
+                chart.render();
+            });
+        }
+        
+        // Update flow chart
+        function updateFlowChart(flowData) {
+            if (!flowData) return;
+            
+            const mermaidCode = generateMermaidFlow(flowData);
+            const flowChartElement = document.getElementById('flow-chart');
+            flowChartElement.innerHTML = mermaidCode;
+            
+            // Re-initialize Mermaid
+            mermaid.init(undefined, flowChartElement);
+        }
+        
+        // Generate Mermaid flow chart code
+        function generateMermaidFlow(flowData) {
+            let mermaidCode = 'graph TD\n';
+            
+            // Add nodes
+            flowData.nodes.forEach(node => {
+                const status = node.status === 'completed' ? '✅' : '⏳';
+                mermaidCode += `    ${node.id}["${status} ${node.label}"]\n`;
+            });
+            
+            // Add edges
+            flowData.edges.forEach(edge => {
+                mermaidCode += `    ${edge.from} --> ${edge.to}\n`;
+            });
+            
+            return mermaidCode;
+        }
+        
+        // Toggle flow chart visibility
+        function toggleFlowChart() {
+            const flowChartContainer = document.getElementById('flow-chart-container');
+            flowChartContainer.classList.toggle('hidden');
+        }
+        
+        // Refresh all charts
+        function refreshCharts() {
+            chartInstances.forEach(chart => {
+                chart.updateOptions({
+                    chart: {
+                        animations: {
+                            enabled: true,
+                            easing: 'easeinout',
+                            speed: 800
+                        }
+                    }
+                });
+            });
+        }
+        
+        // Export data
+        function exportData() {
+            if (!etlData) {
+                showError('No data available to export');
+                return;
+            }
+            
+            const dataStr = JSON.stringify(etlData, null, 2);
+            const dataBlob = new Blob([dataStr], {type: 'application/json'});
+            const url = URL.createObjectURL(dataBlob);
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = 'etl_data_export.json';
+            link.click();
+            URL.revokeObjectURL(url);
+        }
+        
+        // Show error message
+        function showError(message) {
+            const container = document.getElementById('charts-container');
+            container.innerHTML = `<div class="error">${message}</div>`;
+        }
+        
+        // Initialize on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            loadETLData();
+        });
+        
+        // Handle window resize
+        window.addEventListener('resize', function() {
+            chartInstances.forEach(chart => {
+                chart.resize();
+            });
+        });
+    </script>
+</body>
+</html>

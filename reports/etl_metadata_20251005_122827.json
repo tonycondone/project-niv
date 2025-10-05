@@ -1,0 +1,26 @@
+{
+  "extract": {
+    "file": "sample_detailed.csv",
+    "rows": 20,
+    "columns": 7,
+    "column_names": [
+      "Date",
+      "Product",
+      "Category",
+      "Sales",
+      "Quantity",
+      "Region",
+      "Profit"
+    ],
+    "timestamp": "2025-10-05T12:28:27.775697"
+  },
+  "transform": {
+    "filters_applied": null,
+    "transformations_applied": [
+      "normalize",
+      "standardize"
+    ],
+    "rows_after_transform": 20,
+    "timestamp": "2025-10-05T12:28:27.780556"
+  }
+}

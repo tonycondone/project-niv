@@ -6,3 +6,6 @@ streamlit
 sqlalchemy
 openpyxl
 python-dotenv
+flask
+numpy
+openpyxl
