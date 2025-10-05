@@ -42,27 +42,42 @@ cd project-niv
 # Download from: https://github.com/tonycondone/project-niv/archive/main.zip
 ```
 
-### Step 2: Install Python Dependencies
+### Step 2: Install Dependencies (Automatic)
 ```bash
-# Install required packages
-pip install -r requirement.txt
+# Option 1: Automatic installation (Recommended)
+python3 install.py
 
-# Or install individually
-pip install pandas numpy matplotlib flask openpyxl jinja2 schedule
+# Option 2: Manual installation
+pip install -r requirement.txt
 ```
 
 ### Step 3: Verify Installation
 ```bash
 # Test the installation
 python3 run_once.py --help
+
+# Or run the interactive mode
+python3 run_once.py --interactive
 ```
 
 **Expected Output:**
 ```
-usage: run_once.py [-h] [--csv CSV] [--filters FILTERS] [--transformations {normalize,log_transform,standardize} ...] [--web] [--port PORT] [--no-browser] [--interactive]
+======================================================================
+🚀 PROJECT NIV - One-Time Data Processing
+📊 ETL + ApexCharts.js Integration
+======================================================================
+🔍 Checking dependencies...
+✅ All dependencies are already installed
+usage: run_once.py [-h] [--csv CSV] [--filters FILTERS] [--transformations {normalize,log_transform,standardize} ...] [--web] [--port PORT] [--no-browser] [--interactive] [--skip-deps]
 
 PROJECT NIV - One-Time Data Processing
 ```
+
+### Automatic Dependency Installation
+The `run_once.py` script automatically checks and installs dependencies:
+- **First run**: Installs all required packages
+- **Subsequent runs**: Skips installation if packages are already installed
+- **Skip option**: Use `--skip-deps` to skip dependency check
 
 ---
 

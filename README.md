@@ -16,6 +16,7 @@ PROJECT NIV is a comprehensive data analysis platform that combines automated em
 - 🔧 **Data Transformations**: Normalization, standardization, and log transformation
 - 🧹 **Data Cleaning**: Duplicate removal, missing value handling, and type conversion
 - 💾 **Multiple Output Formats**: Excel, CSV, JSON for different use cases
+- 📦 **Auto-Installation**: Automatically installs dependencies on first run
 
 ### 📈 Interactive Visualizations
 - 📊 **ApexCharts.js Integration**: Professional-grade interactive charts
@@ -41,18 +42,34 @@ PROJECT NIV is a comprehensive data analysis platform that combines automated em
 ## 🚀 Quick Start
 
 ### 📦 Installation
-1. Clone the repository:
-   ```bash
-   git clone https://github.com/tonycondone/project-niv.git
-   cd project-niv
-   ```
 
-2. Install dependencies:
-   ```bash
-   pip install -r requirement.txt
-   ```
+#### Option 1: Automatic Installation (Recommended)
+```bash
+# Clone the repository
+git clone https://github.com/tonycondone/project-niv.git
+cd project-niv
 
-3. Place your data in the `/data/` directory
+# Run automatic installation
+python3 install.py
+```
+
+#### Option 2: Manual Installation
+```bash
+# Clone the repository
+git clone https://github.com/tonycondone/project-niv.git
+cd project-niv
+
+# Install dependencies manually
+pip install -r requirement.txt
+```
+
+#### Option 3: One-Time Run (Dependencies Auto-Installed)
+```bash
+# Clone and run directly (dependencies installed automatically)
+git clone https://github.com/tonycondone/project-niv.git
+cd project-niv
+python3 run_once.py --interactive
+```
 
 ### 🎯 Usage Modes
 

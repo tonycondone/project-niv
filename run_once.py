@@ -2,15 +2,15 @@
 """
 PROJECT NIV - One-Time Run Script
 Simple script to process any CSV file and generate visualizations
+Automatically installs dependencies before running
 """
 
 import os
 import sys
 import json
 import argparse
+import subprocess
 from pathlib import Path
-from etl_processor import ETLProcessor
-from web_server import app
 import threading
 import time
 import webbrowser
@@ -22,6 +22,68 @@ def print_banner():
     print("🚀 PROJECT NIV - One-Time Data Processing")
     print("📊 ETL + ApexCharts.js Integration")
     print("=" * 70)
+
+def check_and_install_dependencies():
+    """Check and install required dependencies"""
+    print("🔍 Checking dependencies...")
+    
+    required_packages = [
+        'pandas', 'numpy', 'matplotlib', 'flask', 
+        'openpyxl', 'jinja2', 'schedule'
+    ]
+    
+    missing_packages = []
+    
+    for package in required_packages:
+        try:
+            __import__(package)
+        except ImportError:
+            missing_packages.append(package)
+    
+    if missing_packages:
+        print(f"📦 Installing missing packages: {', '.join(missing_packages)}")
+        print("⏳ This may take a few minutes...")
+        
+        try:
+            # Try to install from requirements.txt first
+            if os.path.exists('requirement.txt'):
+                print("📄 Installing from requirement.txt...")
+                result = subprocess.run([
+                    sys.executable, '-m', 'pip', 'install', '-r', 'requirement.txt'
+                ], capture_output=True, text=True, check=True)
+                print("✅ Dependencies installed from requirement.txt")
+            else:
+                # Install individual packages
+                for package in missing_packages:
+                    print(f"📦 Installing {package}...")
+                    subprocess.run([
+                        sys.executable, '-m', 'pip', 'install', package
+                    ], capture_output=True, text=True, check=True)
+                print("✅ All dependencies installed")
+                
+        except subprocess.CalledProcessError as e:
+            print(f"❌ Error installing dependencies: {e}")
+            print("Please install manually: pip install -r requirement.txt")
+            return False
+        except Exception as e:
+            print(f"❌ Unexpected error: {e}")
+            return False
+    else:
+        print("✅ All dependencies are already installed")
+    
+    return True
+
+def import_modules():
+    """Import required modules after dependency installation"""
+    try:
+        global ETLProcessor, app
+        from etl_processor import ETLProcessor
+        from web_server import app
+        return True
+    except ImportError as e:
+        print(f"❌ Error importing modules: {e}")
+        print("Please ensure all files are in the correct directory")
+        return False
 
 def validate_csv_file(file_path):
     """Validate if CSV file exists and is readable"""
@@ -188,10 +250,28 @@ def main():
                        help='Do not open browser automatically')
     parser.add_argument('--interactive', action='store_true', 
                        help='Run in interactive mode')
+    parser.add_argument('--skip-deps', action='store_true',
+                       help='Skip dependency installation (for advanced users)')
     
     args = parser.parse_args()
     
     print_banner()
+    
+    # Check and install dependencies first
+    if not args.skip_deps:
+        if not check_and_install_dependencies():
+            print("❌ Failed to install dependencies. Exiting.")
+            return
+        
+        # Import modules after dependency installation
+        if not import_modules():
+            print("❌ Failed to import required modules. Exiting.")
+            return
+    else:
+        print("⚠️  Skipping dependency check (--skip-deps flag used)")
+        if not import_modules():
+            print("❌ Failed to import required modules. Please install dependencies manually.")
+            return
     
     # Interactive mode
     if args.interactive:
