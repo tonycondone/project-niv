@@ -2,3 +2,7 @@ pandas
 matplotlib
 jinja2
 schedule
+rich
+seaborn
+numpy
+openpyxl

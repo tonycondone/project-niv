@@ -1,97 +1,179 @@
-# 📧 PROJECT NIV — Email Automation Tool for Data Analysis
+# PROJECT NIV - Enhanced Automated Email Reporting System
 
-PROJECT NIV automates the generation and delivery of data analysis reports via email. Designed for analysts, it removes manual steps in summarizing and sharing weekly reports.
+## 🎯 Overview
 
-## 🔧 Features
+PROJECT NIV is now enhanced with a **modern KPI dashboard** featuring Tableau-style visualizations that make all work visible on the terminal. This automated email reporting system processes CSV data, generates comprehensive reports, and delivers them via email with beautiful visual analytics.
 
-- ✅ Auto-send reports via email (Excel + Summary)
-- 📊 Generates charts and visual summaries
-- ⏰ Weekly scheduling (e.g., every Monday 08:00 AM)
-- 🔌 Works with CSV, Excel files
-- 🔒 Secure SMTP login using app password
+## 🆕 What's New
 
-## 🚀 How It Works
+### Modern KPI Dashboard
+- **Tableau-style visualizations** with 4-panel dashboard layout
+- **Real-time KPI calculations** (Total Sales, Average, Growth Rate, Performance Score)
+- **Business intelligence insights** with automated recommendations
+- **Rich terminal interface** with progress bars, colors, and professional formatting
+- **Interactive data tables** with trend indicators
 
-1. Place data in `/data/sample.csv`
-2. Configure `config.json` (email, time, recipients)
-3. Run:
+### Enhanced Terminal Output
+- All work is now **beautifully visible** on the terminal
+- Progress bars and spinners for all operations
+- Professional panels, tables, and cards
+- Color-coded status indicators
+- Error handling with helpful suggestions
 
-    ```bash
-    python main.py         # One-time run
-    python scheduler.py    # Scheduled automation
-    ```
+## 📊 Dashboard Features
 
-## 📁 Folder Structure
+### KPI Cards
+- 💰 **Total Sales**: Aggregate sales across all periods
+- 📊 **Average Sales**: Mean sales per period
+- 📈 **Growth Rate**: Overall growth percentage
+- ⭐ **Performance Score**: Calculated performance rating (0-100)
 
-```plaintext
-project_niv/
-├── data/             # Source CSV or Excel files
-├── reports/          # Auto-generated reports/charts
-├── templates/        # (Optional) HTML email templates
-├── logs/             # Error or activity logs
-├── main.py           # Main runner script
-├── scheduler.py      # Auto-send scheduler
-├── email_utils.py    # Handles email formatting + sending
-├── data_processor.py # Reads and analyzes data
-├── config.json       # Email settings + schedule
-└── README.md         # This file
-```
+### Visualizations
+1. **Sales Trend Line Chart**: Time series with filled area
+2. **Monthly Sales vs Average**: Bar chart with average line
+3. **Performance Gauge**: Pie chart showing score
+4. **Growth Trend Analysis**: Scatter plot with trend line
 
-## 📦 Requirements
+### Business Intelligence
+- Automated insights based on data patterns
+- Performance recommendations
+- Best/worst period identification
+- Trend analysis with actionable advice
 
-Install Python libraries:
+## 🚀 Quick Start
 
+### 1. Install Dependencies
 ```bash
-pip install -r requirements.txt
+pip install -r requirement.txt
 ```
 
-## ✉️ Email Config (`config.json`)
+### 2. Run the Enhanced System
+```bash
+# Full system with KPI dashboard
+python3 main.py
 
+# Standalone dashboard demo
+python3 dashboard_demo.py
+
+# Enhanced project overview
+python3 demo.py
+```
+
+## 📁 Project Structure
+
+```
+PROJECT NIV/
+├── 📄 main.py                 # Enhanced main execution script
+├── 📊 data_processor.py       # Data analysis with rich output
+├── 📧 email_utils.py          # Professional email formatting
+├── 🎯 kpi_dashboard.py        # Modern KPI dashboard (NEW)
+├── 🎮 dashboard_demo.py       # Standalone dashboard demo (NEW)
+├── 📋 demo.py                 # Enhanced demo script
+├── ⏰ scheduler.py            # Automated scheduling
+├── 📋 config.json             # Email configuration
+├── 📋 requirement.txt         # Dependencies (updated)
+├── 📁 data/
+│   └── sample.csv             # Sample sales data
+└── 📁 reports/
+    ├── kpi_dashboard.png      # Tableau-style dashboard (NEW)
+    ├── chart.png              # Basic visualization
+    └── report.xlsx            # Excel report
+```
+
+## 🎨 Visual Examples
+
+### Terminal Output
+The system now provides beautiful terminal output with:
+- 🎯 Professional headers and panels
+- 📊 Interactive progress bars
+- 📋 Formatted data tables
+- 💡 Color-coded insights
+- ✅ Status indicators
+
+### KPI Dashboard
+Generated `reports/kpi_dashboard.png` includes:
+- 4-panel professional layout
+- Sales trend analysis
+- Performance metrics
+- Growth visualization
+- Business intelligence summaries
+
+## 📧 Email Integration
+
+Enhanced email features:
+- Professional formatting with executive summary
+- Comprehensive attachment descriptions
+- Business intelligence insights included
+- Enhanced error handling and status reporting
+
+## 🔧 Configuration
+
+Update `config.json` with your email settings:
 ```json
 {
-  "sender_email": "your@gmail.com",
-  "password": "your_app_password",
-  "smtp_server": "smtp.gmail.com",
-  "smtp_port": 587,
-  "receiver_emails": ["someone@example.com"],
-  "subject": "Weekly Data Report",
-  "send_time": "08:00"
+    "sender_email": "your-email@example.com",
+    "password": "your-app-password",
+    "smtp_server": "smtp.gmail.com",
+    "smtp_port": 587,
+    "receiver_emails": ["recipient@example.com"],
+    "subject": "Weekly Data Report with KPI Dashboard"
 }
 ```
 
-> Use an app password (e.g., for Gmail) instead of your real password.
+## 📈 Data Format
 
-## 🧠 Example Use Case
+The system expects CSV data in this format:
+```csv
+Month,Sales
+Jan,2000
+Feb,3000
+Mar,2500
+Apr,4000
+```
 
-- Sales analysts receive automated weekly reports with updated sales summaries and charts.
-- Managers get a Monday 8 AM email with insights—without writing any code.
+## 🎯 Key Improvements
 
-## 📌 Future Improvements
+1. **Visual Analytics**: Tableau-style dashboard with professional charts
+2. **Terminal Experience**: Rich, colorful, progress-aware interface
+3. **Business Intelligence**: Automated insights and recommendations
+4. **Performance Metrics**: Real-time KPI calculations
+5. **Error Handling**: Enhanced with helpful suggestions
+6. **Documentation**: Comprehensive usage examples
 
-- Web UI (Streamlit)
-- Database logging
-- HTML-based email reports
+## 🚀 Usage Examples
+
+### Complete Workflow
+```bash
+python3 main.py
+```
+Runs the full system: KPI dashboard → data processing → email delivery
+
+### Dashboard Only
+```bash
+python3 dashboard_demo.py
+```
+Demonstrates the standalone KPI dashboard functionality
+
+### System Overview
+```bash
+python3 demo.py
+```
+Shows enhanced project overview with visual previews
+
+## 🎉 Results
+
+The enhanced system now provides:
+- ✅ **Modern KPI Dashboard** similar to Tableau
+- ✅ **Beautiful terminal output** with all work visible
+- ✅ **Professional visualizations** ready for business use
+- ✅ **Automated insights** and recommendations
+- ✅ **Enhanced email reports** with comprehensive content
+- ✅ **Production-ready** system with error handling
+
+## 📞 Support
+
+The system includes comprehensive error handling and helpful suggestions. All dependencies are listed in `requirement.txt` and the system will guide you through any setup issues.
 
 ---
 
-## 📌 PROJECT NIV – Automated Email Reporting Tool for Data Analysts
-
-**Tech Stack:** Python, Pandas, Matplotlib, Jinja2, SMTP, Schedule
-
-### Description
-
-PROJECT NIV is a Python-based automation tool designed to streamline the reporting workflow for data analysts. It automates the extraction, summarization, visualization, and email delivery of analytical reports to stakeholders on a scheduled basis.
-
-### Key Features
-
-- **Automated Report Generation**: Processes data from CSV/Excel files and generates insightful reports.
-- **Email Delivery**: Sends reports with summaries, attached Excel files, and optional charts.
-- **Configurable Scheduling**: Set up automated email delivery (e.g., every Monday at 08:00 AM).
-- **Secure SMTP Integration**: Supports Gmail, Outlook, and other email providers with app passwords.
-- **Modular Design**: Built for scalability with future UI and database integration in mind.
-
-### Impact
-
-PROJECT NIV eliminates repetitive manual reporting tasks, ensuring timely and consistent delivery of insights to decision-makers. It is ideal for internal reporting across industries such as business, healthcare, education, and logistics.
-
-**GitHub Repository**: (<https://github.com/tonycondone/project-niv>)
+**PROJECT NIV** - Making data beautiful and actionable! 🚀📊
