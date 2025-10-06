@@ -1,0 +1,11 @@
+customer_id,age,gender,location,registration_date,purchase_amount,frequency,segment
+C001,25,Female,New York,2023-01-15,1250.50,5,Premium
+C002,34,Male,California,2023-02-20,890.25,3,Standard
+C003,45,Female,Texas,2023-01-10,2100.75,8,Premium
+C004,28,Male,Florida,2023-03-05,450.00,2,Basic
+C005,52,Female,New York,2023-01-25,1800.30,6,Premium
+C006,31,Male,California,2023-02-15,675.80,4,Standard
+C007,38,Female,Texas,2023-03-10,1200.00,5,Standard
+C008,29,Male,Florida,2023-01-30,320.50,1,Basic
+C009,42,Female,New York,2023-02-25,1950.25,7,Premium
+C010,36,Male,California,2023-03-15,780.90,3,Standard
