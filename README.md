@@ -1,8 +1,12 @@
-# PROJECT NIV - Enhanced Automated Email Reporting System
+# PROJECT NIV - Production-Ready Adaptive Dashboard System
 
 ## 🎯 Overview
 
-PROJECT NIV is now enhanced with a **modern KPI dashboard** featuring Tableau-style visualizations that make all work visible on the terminal. This automated email reporting system processes CSV data, generates comprehensive reports, and delivers them via email with beautiful visual analytics.
+**PROJECT NIV** is a **production-ready, real-time adaptive dashboard system** that automatically analyzes any CSV dataset and generates appropriate KPIs, visualizations, and business insights. The system intelligently adapts to different data structures and business domains without requiring manual configuration.
+
+## ❌ **IMPORTANT: This is a Python Project**
+
+If you're getting npm errors like "Missing script: backend", it's because **PROJECT NIV is a Python project**, not a Node.js project!
 
 ## 🆕 What's New
 
@@ -42,21 +46,35 @@ PROJECT NIV is now enhanced with a **modern KPI dashboard** featuring Tableau-st
 
 ## 🚀 Quick Start
 
-### 1. Install Dependencies
+### ✅ **Correct Way to Run (Python)**
 ```bash
+# 1. Install dependencies
 pip install -r requirement.txt
+
+# 2. Run the production system (works with any CSV)
+python production_main.py
+
+# 3. Or see the flexibility demo
+python demo_flexibility.py
 ```
 
-### 2. Run the Enhanced System
+### ✅ **Alternative: Using npm (Now Fixed)**
 ```bash
-# Full system with KPI dashboard
-python3 main.py
+# Install dependencies
+npm run install
 
-# Standalone dashboard demo
-python3 dashboard_demo.py
+# Run the system
+npm run backend
 
-# Enhanced project overview
-python3 demo.py
+# Run demo
+npm run demo
+```
+
+### ✅ **Easy Start Scripts**
+```bash
+# Windows: Double-click start.bat
+# Linux/Mac: ./start.sh
+# Cross-platform: python run.py
 ```
 
 ## 📁 Project Structure

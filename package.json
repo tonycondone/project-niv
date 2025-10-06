@@ -1,0 +1,48 @@
+{
+  "name": "project-niv",
+  "version": "1.0.0",
+  "description": "PROJECT NIV - Production-Ready Adaptive Dashboard System",
+  "main": "production_main.py",
+  "scripts": {
+    "install": "pip install -r requirement.txt",
+    "install:backend": "pip install -r requirement.txt",
+    "backend": "python production_main.py",
+    "start": "python production_main.py",
+    "dev": "python production_main.py",
+    "demo": "python demo_flexibility.py",
+    "dashboard": "python dashboard_demo.py",
+    "test": "python demo_flexibility.py",
+    "build": "echo 'PROJECT NIV is a Python project - no build step required'",
+    "type-check": "echo 'PROJECT NIV is a Python project - use pylint or mypy for type checking'"
+  },
+  "keywords": [
+    "python",
+    "dashboard",
+    "analytics",
+    "kpi",
+    "tableau",
+    "data-visualization",
+    "business-intelligence"
+  ],
+  "author": "PROJECT NIV Team",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/your-username/project-niv.git"
+  },
+  "engines": {
+    "python": ">=3.8",
+    "node": ">=16.0.0"
+  },
+  "dependencies": {},
+  "devDependencies": {},
+  "python": {
+    "requirements": "requirement.txt",
+    "main": "production_main.py",
+    "scripts": {
+      "start": "python production_main.py",
+      "demo": "python demo_flexibility.py",
+      "dashboard": "python dashboard_demo.py"
+    }
+  }
+}
