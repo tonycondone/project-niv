@@ -3,15 +3,15 @@ PROJECT NIV - FastAPI Backend
 Professional Data Analysis & Visualization Platform
 """
 
-from fastapi import FastAPI, HTTPException, UploadFile, File
+from fastapi import FastAPI, HTTPException, Query, UploadFile, File
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import FileResponse
+from fastapi.responses import FileResponse, JSONResponse
 import pandas as pd
 import numpy as np
 import json
 import os
 from datetime import datetime
-from typing import Dict, List, Any, Optional
+from typing import Dict, List, Any, Optional, cast
 import logging
 from pathlib import Path
 
@@ -24,7 +24,7 @@ app = FastAPI(
     description="Professional Data Analysis & Visualization Platform",
     version="4.0.0",
     docs_url="/docs",
-    redoc_url="/redoc"
+    redoc_url="/redoc",
 )
 
 # CORS middleware
@@ -36,6 +36,7 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+
 # Global ETL processor instance
 class ETLProcessor:
     def __init__(self, data_dir: str = "data", output_dir: str = "reports"):
@@ -43,28 +44,33 @@ class ETLProcessor:
         self.output_dir = output_dir
         self.raw_data = None
         self.filtered_data = None
-        self.etl_metadata = {}
-        
+        self.etl_metadata: Dict[str, Any] = {}
+
         # Create output directories
         os.makedirs(output_dir, exist_ok=True)
         os.makedirs(f"{output_dir}/charts", exist_ok=True)
         os.makedirs(f"{output_dir}/data", exist_ok=True)
-    
+
     def extract(self, csv_file: str) -> pd.DataFrame:
         """Extract data from CSV file"""
         try:
             # Handle both relative and absolute paths
-            if os.path.isabs(csv_file) or csv_file.startswith('./') or csv_file.startswith('../'):
+            if (
+                os.path.isabs(csv_file)
+                or csv_file.startswith("./")
+                or csv_file.startswith("../")
+                or os.path.exists(csv_file)
+            ):
                 file_path = csv_file
             else:
                 file_path = os.path.join(self.data_dir, csv_file)
-            
+
             logger.info(f"Extracting data from {file_path}")
-            
+
             # Try different encodings
-            encodings = ['utf-8', 'latin-1', 'cp1252', 'iso-8859-1']
+            encodings = ["utf-8", "latin-1", "cp1252", "iso-8859-1"]
             df = None
-            
+
             for encoding in encodings:
                 try:
                     df = pd.read_csv(file_path, encoding=encoding)
@@ -72,387 +78,424 @@ class ETLProcessor:
                     break
                 except UnicodeDecodeError:
                     continue
-            
+
             if df is None:
-                raise ValueError("Could not decode CSV file with any supported encoding")
-            
+                raise ValueError(
+                    "Could not decode CSV file with any supported encoding"
+                )
+
             # Store metadata
-            self.etl_metadata['extraction'] = {
-                'file_path': file_path,
-                'rows': len(df),
-                'columns': len(df.columns),
-                'timestamp': datetime.now().isoformat()
+            self.etl_metadata["extraction"] = {
+                "file_path": file_path,
+                "rows": len(df),
+                "columns": len(df.columns),
+                "timestamp": datetime.now().isoformat(),
             }
-            
+
             logger.info(f"Extracted {len(df)} rows and {len(df.columns)} columns")
             self.raw_data = df
             return df
-            
+
         except Exception as e:
             logger.error(f"Error extracting data: {str(e)}")
             raise
-    
-    def transform(self, filters: Optional[Dict] = None, transformations: Optional[List[str]] = None) -> pd.DataFrame:
+
+    def transform(
+        self,
+        filters: Optional[Dict] = None,
+        transformations: Optional[List[str]] = None,
+    ) -> pd.DataFrame:
         """Transform data with filters and transformations"""
         if self.raw_data is None:
             raise ValueError("No data to transform. Call extract() first.")
-        
+
         logger.info("Starting data transformation")
         df = self.raw_data.copy()
-        
+
         # Apply filters
         if filters:
             df = self._apply_filters(df, filters)
-        
+
         # Apply transformations
         if transformations:
             df = self._apply_transformations(df, transformations)
-        
+
         # Clean data
         df = self._clean_data(df)
-        
+
         # Store metadata
-        self.etl_metadata['transformation'] = {
-            'filters_applied': filters,
-            'transformations_applied': transformations,
-            'rows_before': len(self.raw_data),
-            'rows_after': len(df),
-            'timestamp': datetime.now().isoformat()
+        self.etl_metadata["transformation"] = {
+            "filters_applied": filters,
+            "transformations_applied": transformations,
+            "rows_before": len(self.raw_data),
+            "rows_after": len(df),
+            "timestamp": datetime.now().isoformat(),
         }
-        
+
         logger.info(f"Transformation complete. {len(df)} rows remaining")
         self.filtered_data = df
         return df
-    
+
     def _apply_filters(self, df: pd.DataFrame, filters: Dict) -> pd.DataFrame:
         """Apply filters to DataFrame"""
         for column, condition in filters.items():
             if column not in df.columns:
                 logger.warning(f"Column {column} not found in data")
                 continue
-            
+
             if isinstance(condition, dict):
-                if 'min' in condition and 'max' in condition:
-                    df = df[(df[column] >= condition['min']) & (df[column] <= condition['max'])]
-                elif 'min' in condition:
-                    df = df[df[column] >= condition['min']]
-                elif 'max' in condition:
-                    df = df[df[column] <= condition['max']]
+                if "min" in condition and "max" in condition:
+                    df = df[
+                        (df[column] >= condition["min"])
+                        & (df[column] <= condition["max"])
+                    ]
+                elif "min" in condition:
+                    df = df[df[column] >= condition["min"]]
+                elif "max" in condition:
+                    df = df[df[column] <= condition["max"]]
             elif isinstance(condition, list):
                 df = df[df[column].isin(condition)]
             else:
                 df = df[df[column] == condition]
-        
+
         return df
-    
-    def _apply_transformations(self, df: pd.DataFrame, transformations: List[str]) -> pd.DataFrame:
+
+    def _apply_transformations(
+        self, df: pd.DataFrame, transformations: List[str]
+    ) -> pd.DataFrame:
         """Apply transformations to DataFrame"""
         for transformation in transformations:
-            if transformation == 'normalize':
+            if transformation == "normalize":
                 numeric_cols = df.select_dtypes(include=[np.number]).columns
                 for col in numeric_cols:
                     if df[col].std() != 0:
-                        df[col] = (df[col] - df[col].min()) / (df[col].max() - df[col].min())
-            
-            elif transformation == 'standardize':
+                        df[col] = (df[col] - df[col].min()) / (
+                            df[col].max() - df[col].min()
+                        )
+
+            elif transformation == "standardize":
                 numeric_cols = df.select_dtypes(include=[np.number]).columns
                 for col in numeric_cols:
                     if df[col].std() != 0:
                         df[col] = (df[col] - df[col].mean()) / df[col].std()
-            
-            elif transformation == 'log_transform':
+
+            elif transformation == "log_transform":
                 numeric_cols = df.select_dtypes(include=[np.number]).columns
                 for col in numeric_cols:
                     if (df[col] > 0).all():
                         df[col] = np.log1p(df[col])
-        
+
         return df
-    
+
     def _clean_data(self, df: pd.DataFrame) -> pd.DataFrame:
         """Clean data by removing duplicates and handling missing values"""
         initial_rows = len(df)
-        
+
         # Remove duplicates
         df = df.drop_duplicates()
-        
+
         # Handle missing values
         numeric_cols = df.select_dtypes(include=[np.number]).columns
         if len(numeric_cols) > 0:
             df[numeric_cols] = df[numeric_cols].fillna(df[numeric_cols].median())
-        
+
         non_numeric_cols = df.select_dtypes(exclude=[np.number]).columns
-        df[non_numeric_cols] = df[non_numeric_cols].fillna('Unknown')
-        
+        df[non_numeric_cols] = df[non_numeric_cols].fillna("Unknown")
+
         # Try to convert object columns to numeric
         for col in df.columns:
-            if df[col].dtype == 'object':
+            if df[col].dtype == "object":
                 try:
-                    pd.to_numeric(df[col], errors='raise')
+                    pd.to_numeric(df[col], errors="raise")
                     df[col] = pd.to_numeric(df[col])
                 except (ValueError, TypeError):
                     pass
-        
+
         logger.info(f"Data cleaning: {initial_rows - len(df)} duplicates removed")
         return df
-    
-    def load(self, output_format: str = 'excel') -> Dict[str, str]:
+
+    def load(self, output_format: str = "excel") -> Dict[str, str]:
         """Load processed data to files"""
         if self.filtered_data is None:
             raise ValueError("No processed data to load. Call transform() first.")
-        
+
         timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
         output_files = {}
-        
-        if output_format == 'excel':
+
+        if output_format == "excel":
             file_path = f"{self.output_dir}/processed_data_{timestamp}.xlsx"
             self.filtered_data.to_excel(file_path, index=False)
-            output_files['excel'] = file_path
-        
-        elif output_format == 'csv':
+            output_files["excel"] = file_path
+
+        elif output_format == "csv":
             file_path = f"{self.output_dir}/processed_data_{timestamp}.csv"
             self.filtered_data.to_csv(file_path, index=False)
-            output_files['csv'] = file_path
-        
-        elif output_format == 'json':
+            output_files["csv"] = file_path
+
+        elif output_format == "json":
             file_path = f"{self.output_dir}/data_{timestamp}.json"
-            self.filtered_data.to_json(file_path, orient='records', indent=2)
-            output_files['json'] = file_path
-        
+            self.filtered_data.to_json(file_path, orient="records", indent=2)
+            output_files["json"] = file_path
+
         # Save metadata
         metadata_path = f"{self.output_dir}/etl_metadata_{timestamp}.json"
-        with open(metadata_path, 'w') as f:
+        with open(metadata_path, "w") as f:
             json.dump(self.etl_metadata, f, indent=2)
-        
-        output_files['metadata'] = metadata_path
+
+        output_files["metadata"] = metadata_path
         logger.info(f"Data loaded to {len(output_files)} files")
-        
+
         return output_files
-    
-    def generate_apexcharts_config(self, chart_type: str = 'line') -> Dict[str, Any]:
+
+    def generate_apexcharts_config(self, chart_type: str = "line") -> Dict[str, Any]:
         """Generate ApexCharts configuration"""
         if self.filtered_data is None:
             raise ValueError("No processed data available")
-        
+
         df = self.filtered_data
         numeric_cols = df.select_dtypes(include=[np.number]).columns.tolist()
-        
+
         if len(numeric_cols) == 0:
             raise ValueError("No numeric columns available for charting")
-        
+
         base_config = {
-            'chart': {
-                'type': chart_type,
-                'height': 350,
-                'background': 'transparent',
-                'foreColor': '#FFFFFF'
+            "chart": {
+                "type": chart_type,
+                "height": 350,
+                "background": "transparent",
+                "foreColor": "#FFFFFF",
             },
-            'theme': {
-                'mode': 'dark',
-                'palette': 'palette1'
-            },
-            'colors': ['#00D4FF', '#0099CC', '#00FF88', '#FFB800', '#FF4444']
+            "theme": {"mode": "dark", "palette": "palette1"},
+            "colors": ["#00D4FF", "#0099CC", "#00FF88", "#FFB800", "#FF4444"],
         }
-        
-        if chart_type == 'line':
+
+        if chart_type == "line":
             if len(numeric_cols) >= 2:
                 x_col = numeric_cols[0]
                 y_col = numeric_cols[1]
-                data = df[[x_col, y_col]].head(20).to_dict('records')
-                
+                data = df[[x_col, y_col]].head(20).to_dict("records")
+
                 config = {
                     **base_config,
-                    'title': {
-                        'text': f'{x_col} vs {y_col} - Line Chart',
-                        'style': { 'color': '#FFFFFF' }
+                    "title": {
+                        "text": f"{x_col} vs {y_col} - Line Chart",
+                        "style": {"color": "#FFFFFF"},
                     },
-                    'series': [{
-                        'name': y_col,
-                        'data': [{'x': str(row[x_col]), 'y': row[y_col]} for row in data]
-                    }],
-                    'xaxis': {
-                        'title': { 'text': x_col },
-                        'labels': { 'style': { 'colors': '#B0B0B0' } }
+                    "series": [
+                        {
+                            "name": y_col,
+                            "data": [
+                                {"x": str(row[x_col]), "y": row[y_col]} for row in data
+                            ],
+                        }
+                    ],
+                    "xaxis": {
+                        "title": {"text": x_col},
+                        "labels": {"style": {"colors": "#B0B0B0"}},
                     },
-                    'yaxis': {
-                        'title': { 'text': y_col },
-                        'labels': { 'style': { 'colors': '#B0B0B0' } }
-                    }
+                    "yaxis": {
+                        "title": {"text": y_col},
+                        "labels": {"style": {"colors": "#B0B0B0"}},
+                    },
                 }
             else:
                 raise ValueError("Line chart requires at least 2 numeric columns")
-        
-        elif chart_type == 'bar':
+
+        elif chart_type == "bar":
             if len(numeric_cols) >= 1:
                 col = numeric_cols[0]
                 data = df[col].head(10).to_dict()
-                
+
                 config = {
                     **base_config,
-                    'title': {
-                        'text': f'{col} - Bar Chart',
-                        'style': { 'color': '#FFFFFF' }
+                    "title": {
+                        "text": f"{col} - Bar Chart",
+                        "style": {"color": "#FFFFFF"},
                     },
-                    'series': [{
-                        'name': col,
-                        'data': list(data.values())
-                    }],
-                    'xaxis': {
-                        'categories': list(data.keys()),
-                        'labels': { 'style': { 'colors': '#B0B0B0' } }
-                    }
+                    "series": [{"name": col, "data": list(data.values())}],
+                    "xaxis": {
+                        "categories": list(data.keys()),
+                        "labels": {"style": {"colors": "#B0B0B0"}},
+                    },
                 }
             else:
                 raise ValueError("Bar chart requires at least 1 numeric column")
-        
-        elif chart_type == 'pie':
+
+        elif chart_type == "pie":
             if len(numeric_cols) >= 1:
                 col = numeric_cols[0]
                 data = df[col].head(8).to_dict()
-                
+
                 config = {
                     **base_config,
-                    'title': {
-                        'text': f'{col} - Pie Chart',
-                        'style': { 'color': '#FFFFFF' }
+                    "title": {
+                        "text": f"{col} - Pie Chart",
+                        "style": {"color": "#FFFFFF"},
                     },
-                    'series': list(data.values()),
-                    'labels': list(data.keys())
+                    "series": list(data.values()),
+                    "labels": list(data.keys()),
                 }
             else:
                 raise ValueError("Pie chart requires at least 1 numeric column")
-        
-        elif chart_type == 'area':
+
+        elif chart_type == "area":
             if len(numeric_cols) >= 2:
                 x_col = numeric_cols[0]
                 y_col = numeric_cols[1]
-                data = df[[x_col, y_col]].head(20).to_dict('records')
-                
+                data = df[[x_col, y_col]].head(20).to_dict("records")
+
                 config = {
                     **base_config,
-                    'title': {
-                        'text': f'{x_col} vs {y_col} - Area Chart',
-                        'style': { 'color': '#FFFFFF' }
+                    "title": {
+                        "text": f"{x_col} vs {y_col} - Area Chart",
+                        "style": {"color": "#FFFFFF"},
                     },
-                    'series': [{
-                        'name': y_col,
-                        'data': [{'x': str(row[x_col]), 'y': row[y_col]} for row in data]
-                    }],
-                    'xaxis': {
-                        'title': { 'text': x_col },
-                        'labels': { 'style': { 'colors': '#B0B0B0' } }
+                    "series": [
+                        {
+                            "name": y_col,
+                            "data": [
+                                {"x": str(row[x_col]), "y": row[y_col]} for row in data
+                            ],
+                        }
+                    ],
+                    "xaxis": {
+                        "title": {"text": x_col},
+                        "labels": {"style": {"colors": "#B0B0B0"}},
                     },
-                    'yaxis': {
-                        'title': { 'text': y_col },
-                        'labels': { 'style': { 'colors': '#B0B0B0' } }
-                    }
+                    "yaxis": {
+                        "title": {"text": y_col},
+                        "labels": {"style": {"colors": "#B0B0B0"}},
+                    },
                 }
             else:
                 raise ValueError("Area chart requires at least 2 numeric columns")
-        
-        elif chart_type == 'scatter':
+
+        elif chart_type == "scatter":
             if len(numeric_cols) >= 2:
                 col1, col2 = numeric_cols[0], numeric_cols[1]
-                data = df[[col1, col2]].head(20).to_dict('records')
-                
+                data = df[[col1, col2]].head(20).to_dict("records")
+
                 config = {
                     **base_config,
-                    'title': {
-                        'text': f'{col1} vs {col2} - Scatter Plot',
-                        'style': { 'color': '#FFFFFF' }
+                    "title": {
+                        "text": f"{col1} vs {col2} - Scatter Plot",
+                        "style": {"color": "#FFFFFF"},
                     },
-                    'series': [{
-                        'name': f'{col1} vs {col2}',
-                        'data': [{'x': row[col1], 'y': row[col2]} for row in data]
-                    }],
-                    'xaxis': {
-                        'title': { 'text': col1 },
-                        'labels': { 'style': { 'colors': '#B0B0B0' } }
+                    "series": [
+                        {
+                            "name": f"{col1} vs {col2}",
+                            "data": [{"x": row[col1], "y": row[col2]} for row in data],
+                        }
+                    ],
+                    "xaxis": {
+                        "title": {"text": col1},
+                        "labels": {"style": {"colors": "#B0B0B0"}},
                     },
-                    'yaxis': {
-                        'title': { 'text': col2 },
-                        'labels': { 'style': { 'colors': '#B0B0B0' } }
-                    }
+                    "yaxis": {
+                        "title": {"text": col2},
+                        "labels": {"style": {"colors": "#B0B0B0"}},
+                    },
                 }
             else:
                 raise ValueError("Scatter plot requires at least 2 numeric columns")
-        
+
         else:
             raise ValueError(f"Unsupported chart type: {chart_type}")
-        
+
         return config
-    
+
     def create_flow_chart_data(self) -> Dict[str, Any]:
         """Create flow chart data for ETL process"""
         return {
-            'nodes': [
-                {'id': 'extract', 'label': 'Extract Data', 'status': 'completed'},
-                {'id': 'filter', 'label': 'Filter Data', 'status': 'completed'},
-                {'id': 'transform', 'label': 'Transform Data', 'status': 'completed'},
-                {'id': 'load', 'label': 'Load Data', 'status': 'completed'},
-                {'id': 'visualize', 'label': 'Generate Charts', 'status': 'completed'}
+            "nodes": [
+                {"id": "extract", "label": "Extract Data", "status": "completed"},
+                {"id": "filter", "label": "Filter Data", "status": "completed"},
+                {"id": "transform", "label": "Transform Data", "status": "completed"},
+                {"id": "load", "label": "Load Data", "status": "completed"},
+                {"id": "visualize", "label": "Generate Charts", "status": "completed"},
             ],
-            'edges': [
-                {'from': 'extract', 'to': 'filter'},
-                {'from': 'filter', 'to': 'transform'},
-                {'from': 'transform', 'to': 'load'},
-                {'from': 'load', 'to': 'visualize'}
-            ]
+            "edges": [
+                {"from": "extract", "to": "filter"},
+                {"from": "filter", "to": "transform"},
+                {"from": "transform", "to": "load"},
+                {"from": "load", "to": "visualize"},
+            ],
         }
-    
-    def run_full_etl(self, csv_file: str, filters: Optional[Dict] = None, transformations: Optional[List[str]] = None) -> Dict[str, Any]:
+
+    def run_full_etl(
+        self,
+        csv_file: str,
+        filters: Optional[Dict] = None,
+        transformations: Optional[List[str]] = None,
+    ) -> Dict[str, Any]:
         """Run complete ETL process"""
         logger.info("Starting full ETL process")
-        
+
         # Extract
         self.extract(csv_file)
-        
+
         # Transform
         self.transform(filters, transformations)
-        
+
         # Load
         output_files = self.load()
-        
+
         # Generate chart configurations
         chart_configs = {}
-        for chart_type in ['line', 'bar', 'area', 'pie']:
+        for chart_type in ["line", "bar", "area", "pie"]:
             try:
                 chart_configs[chart_type] = self.generate_apexcharts_config(chart_type)
             except Exception as e:
                 logger.warning(f"Could not generate {chart_type} chart: {str(e)}")
-        
+
         # Create flow chart data
         flow_data = self.create_flow_chart_data()
-        
+
         # Prepare results
         results = {
-            'summary': {
-                'original_rows': len(self.raw_data) if self.raw_data is not None else 0,
-                'processed_rows': len(self.filtered_data) if self.filtered_data is not None else 0,
-                'columns': len(self.filtered_data.columns) if self.filtered_data is not None else 0
+            "summary": {
+                "original_rows": len(self.raw_data) if self.raw_data is not None else 0,
+                "processed_rows": (
+                    len(self.filtered_data) if self.filtered_data is not None else 0
+                ),
+                "columns": (
+                    len(self.filtered_data.columns)
+                    if self.filtered_data is not None
+                    else 0
+                ),
             },
-            'chart_configs': chart_configs,
-            'flow_data': flow_data,
-            'output_files': output_files,
-            'metadata': self.etl_metadata
+            "chart_configs": chart_configs,
+            "flow_data": flow_data,
+            "output_files": output_files,
+            "metadata": self.etl_metadata,
         }
-        
+
         logger.info("ETL process completed successfully")
         return results
 
+
+# Resolve project data directory relative to this file to work in tests and prod
+PROJECT_ROOT = Path(__file__).resolve().parent.parent
+DEFAULT_DATA_DIR = str((PROJECT_ROOT / "data").resolve())
+
 # Global ETL processor instance
-etl_processor = ETLProcessor(data_dir='data')
+etl_processor = ETLProcessor(data_dir=DEFAULT_DATA_DIR)
+
 
 @app.get("/")
 async def root():
     return {"message": "PROJECT NIV API", "version": "4.0.0"}
+
 
 @app.get("/api/health")
 async def health_check():
     return {
         "status": "healthy",
         "etl_processor": "ready",
-        "data_available": etl_processor.filtered_data is not None
+        "data_available": etl_processor.filtered_data is not None,
+        "timestamp": datetime.now().isoformat(),
     }
+
 
 @app.get("/api/etl-data")
 async def get_etl_data():
@@ -461,74 +504,226 @@ async def get_etl_data():
         # Check if we have processed data, if not try to load sample data
         if etl_processor.filtered_data is None:
             # Try to load sample data automatically
-            sample_files = ['data/sample_detailed.csv', 'data/sample.csv']
+            sample_files = ["data/sample_detailed.csv", "data/sample.csv"]
             for sample_file in sample_files:
                 if os.path.exists(sample_file):
                     logger.info(f"Auto-loading sample data from {sample_file}")
                     etl_processor.run_full_etl(sample_file)
                     break
             else:
-                raise HTTPException(status_code=400, detail="No ETL data available and no sample data found. Please upload a CSV file first.")
-        
+                raise HTTPException(
+                    status_code=400,
+                    detail=(
+                        "No ETL data available and no sample data found. "
+                        "Please upload a CSV file first."
+                    ),
+                )
+
         # Generate chart configurations
         chart_configs = {}
-        for chart_type in ['line', 'bar', 'area', 'pie']:
+        for chart_type in ["line", "bar", "area", "pie"]:
             try:
-                chart_configs[chart_type] = etl_processor.generate_apexcharts_config(chart_type)
+                chart_configs[chart_type] = etl_processor.generate_apexcharts_config(
+                    chart_type
+                )
             except Exception as e:
                 logger.warning(f"Could not generate {chart_type} chart: {str(e)}")
-        
+
         # Create flow chart data
         flow_data = etl_processor.create_flow_chart_data()
-        
-        # Prepare response
+
+        # Prepare response (include aliases expected by some clients/tests)
+        processed_preview = (
+            etl_processor.filtered_data.head(50).to_dict(orient="records")
+            if etl_processor.filtered_data is not None
+            else []
+        )
+
         response = {
-            'chart_configs': chart_configs,
-            'flow_data': flow_data,
-            'summary': {
-                'original_rows': len(etl_processor.raw_data) if etl_processor.raw_data is not None else 0,
-                'processed_rows': len(etl_processor.filtered_data) if etl_processor.filtered_data is not None else 0,
-                'columns': len(etl_processor.filtered_data.columns) if etl_processor.filtered_data is not None else 0
+            "chart_configs": chart_configs,
+            "charts": chart_configs,  # alias for compatibility
+            "processed_data": processed_preview,
+            "flow_data": flow_data,
+            "summary": {
+                "original_rows": (
+                    len(etl_processor.raw_data)
+                    if etl_processor.raw_data is not None
+                    else 0
+                ),
+                "processed_rows": (
+                    len(etl_processor.filtered_data)
+                    if etl_processor.filtered_data is not None
+                    else 0
+                ),
+                "columns": (
+                    len(etl_processor.filtered_data.columns)
+                    if etl_processor.filtered_data is not None
+                    else 0
+                ),
             },
-            'metadata': etl_processor.etl_metadata
+            "metadata": etl_processor.etl_metadata,
         }
-        
+
         return response
-    
+
     except Exception as e:
         logger.error(f"Error getting ETL data: {str(e)}")
         raise HTTPException(status_code=500, detail=str(e))
+
+
+@app.post("/api/upload-csv")
+async def upload_csv(file: UploadFile = File(...)):
+    """Upload a CSV file, store it, and run ETL on it."""
+    try:
+        uploads_dir = os.path.join(DEFAULT_DATA_DIR, "uploads")
+        os.makedirs(uploads_dir, exist_ok=True)
+
+        timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+        safe_name = os.path.basename(file.filename or "uploaded.csv")
+        saved_path = os.path.join(uploads_dir, f"{timestamp}_{safe_name}")
+
+        content = await file.read()
+        with open(saved_path, "wb") as f:
+            f.write(content)
+
+        results = etl_processor.run_full_etl(saved_path)
+        # Basic validation: ensure we have some processed rows and columns
+        summary = results.get("summary", {})
+        if not summary or summary.get("processed_rows", 0) <= 0 or summary.get("columns", 0) <= 0:
+            raise HTTPException(status_code=400, detail="Invalid or empty CSV uploaded")
+        return {
+            "success": True,
+            "message": "Upload and ETL completed successfully",
+            "results": results,
+        }
+    except Exception as e:
+        logger.error(f"Error uploading CSV: {str(e)}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@app.post("/api/apply-filters")
+async def apply_filters(percentage: float = Query(0.5)):
+    """Apply a simple row-percentage filter to the current dataset.
+    If no data is loaded, attempt to load sample data automatically.
+    """
+    try:
+        if etl_processor.raw_data is None:
+            # Load sample data to enable filtering
+            sample_files = [
+                os.path.join(DEFAULT_DATA_DIR, "sample_detailed.csv"),
+                os.path.join(DEFAULT_DATA_DIR, "sample.csv"),
+            ]
+            for sample_file in sample_files:
+                if os.path.exists(sample_file):
+                    etl_processor.extract(sample_file)
+                    break
+            else:
+                raise HTTPException(status_code=400, detail="No data available to filter")
+
+        df = etl_processor.raw_data.copy()
+        # Reduce rows by percentage deterministically
+        rows = max(1, int(len(df) * max(0.0, min(1.0, percentage))))
+        filtered = df.head(rows)
+        filtered = etl_processor._clean_data(filtered)
+        etl_processor.filtered_data = filtered
+        etl_processor.etl_metadata["filtering"] = {
+            "strategy": "row_head_percentage",
+            "percentage": percentage,
+            "rows_before": len(df),
+            "rows_after": len(filtered),
+            "timestamp": datetime.now().isoformat(),
+        }
+
+        # Build response similar to /api/etl-data
+        chart_configs: Dict[str, Any] = {}
+        for chart_type in ["line", "bar", "area", "pie"]:
+            try:
+                chart_configs[chart_type] = etl_processor.generate_apexcharts_config(
+                    chart_type
+                )
+            except Exception as exc:
+                logger.warning(f"Could not generate {chart_type} chart: {str(exc)}")
+
+        response = {
+            "chart_configs": chart_configs,
+            "charts": chart_configs,
+            "processed_data": filtered.head(50).to_dict(orient="records"),
+            "flow_data": etl_processor.create_flow_chart_data(),
+            "summary": {
+                "original_rows": len(etl_processor.raw_data)
+                if etl_processor.raw_data is not None
+                else 0,
+                "processed_rows": len(etl_processor.filtered_data)
+                if etl_processor.filtered_data is not None
+                else 0,
+                "columns": len(etl_processor.filtered_data.columns)
+                if etl_processor.filtered_data is not None
+                else 0,
+            },
+            "metadata": etl_processor.etl_metadata,
+        }
+        return response
+    except Exception as e:
+        logger.error(f"Error applying filters: {str(e)}")
+        raise HTTPException(status_code=500, detail=str(e))
+
 
 @app.post("/api/run-etl")
 async def run_etl(
     csv_file: str = "sample_detailed.csv",
     filters: Optional[Dict] = None,
-    transformations: Optional[List[str]] = None
+    transformations: Optional[List[str]] = None,
 ):
     """Run ETL process"""
     try:
         results = etl_processor.run_full_etl(csv_file, filters, transformations)
         return {
-            'success': True,
-            'message': 'ETL process completed successfully',
-            'results': results
+            "success": True,
+            "message": "ETL process completed successfully",
+            "results": results,
         }
     except Exception as e:
         logger.error(f"Error running ETL: {str(e)}")
         raise HTTPException(status_code=500, detail=str(e))
+
 
 @app.get("/api/chart/{chart_type}")
 async def get_chart_config(chart_type: str):
     """Get specific chart configuration"""
     try:
         if etl_processor.filtered_data is None:
-            raise HTTPException(status_code=400, detail="No data available")
-        
+            # Lazy-load sample data for convenience
+            sample_files = [
+                "data/sample_detailed.csv",
+                "data/sample.csv",
+                "sample_detailed.csv",
+                "sample.csv",
+            ]
+            for sample_file in sample_files:
+                if os.path.exists(sample_file) or os.path.exists(
+                    os.path.join(DEFAULT_DATA_DIR, sample_file)
+                ):
+                    try:
+                        path_to_use = sample_file
+                        # Prefer absolute/explicit path under data dir if found
+                        candidate = os.path.join(
+                            DEFAULT_DATA_DIR, os.path.basename(sample_file)
+                        )
+                        if os.path.exists(candidate):
+                            path_to_use = candidate
+                        etl_processor.run_full_etl(path_to_use)
+                        break
+                    except Exception:
+                        continue
+            else:
+                raise HTTPException(status_code=400, detail="No data available")
+
         config = etl_processor.generate_apexcharts_config(chart_type)
         return config
     except Exception as e:
         logger.error(f"Error getting chart config: {str(e)}")
         raise HTTPException(status_code=500, detail=str(e))
+
 
 @app.get("/api/flow-chart")
 async def get_flow_chart():
@@ -540,27 +735,71 @@ async def get_flow_chart():
         logger.error(f"Error getting flow chart: {str(e)}")
         raise HTTPException(status_code=500, detail=str(e))
 
+
 @app.get("/api/data/export")
-async def export_data():
+async def export_data(fmt: str = Query("csv", alias="format")):
     """Export processed data"""
     try:
         if etl_processor.filtered_data is None:
-            raise HTTPException(status_code=400, detail="No data available")
-        
-        # Save data to temporary file
-        output_file = 'reports/exported_data.csv'
-        os.makedirs('reports', exist_ok=True)
-        etl_processor.filtered_data.to_csv(output_file, index=False)
-        
-        return FileResponse(
-            output_file, 
-            media_type='text/csv',
-            filename='etl_export.csv'
-        )
+            # Try to auto-load sample data
+            sample_files = [
+                "data/sample_detailed.csv",
+                "data/sample.csv",
+                "sample_detailed.csv",
+                "sample.csv",
+            ]
+            for sample_file in sample_files:
+                if os.path.exists(sample_file) or os.path.exists(
+                    os.path.join(DEFAULT_DATA_DIR, sample_file)
+                ):
+                    try:
+                        path_to_use = sample_file
+                        candidate = os.path.join(
+                            DEFAULT_DATA_DIR, os.path.basename(sample_file)
+                        )
+                        if os.path.exists(candidate):
+                            path_to_use = candidate
+                        etl_processor.run_full_etl(path_to_use)
+                        break
+                    except Exception:
+                        continue
+            else:
+                raise HTTPException(status_code=400, detail="No data available")
+
+        os.makedirs("reports", exist_ok=True)
+        df = cast(pd.DataFrame, etl_processor.filtered_data)
+        if fmt == "csv":
+            output_file = "reports/exported_data.csv"
+            df.to_csv(output_file, index=False)
+            return FileResponse(
+                output_file, media_type="text/csv", filename="etl_export.csv"
+            )
+        elif fmt == "json":
+            data = df.to_dict(orient="records")
+            return JSONResponse(content=data, media_type="application/json")
+        elif fmt == "excel":
+            output_file = "reports/exported_data.xlsx"
+            df.to_excel(output_file, index=False)
+            return FileResponse(
+                output_file,
+                media_type=(
+                    "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+                ),
+                filename="etl_export.xlsx",
+            )
+        else:
+            raise HTTPException(
+                status_code=400, detail="Unsupported format. Use csv, json, or excel."
+            )
+    except HTTPException as e:
+        # Re-raise HTTP errors as-is
+        raise e
     except Exception as e:
         logger.error(f"Error exporting data: {str(e)}")
         raise HTTPException(status_code=500, detail=str(e))
 
+
 if __name__ == "__main__":
     import uvicorn
+
     uvicorn.run(app, host="0.0.0.0", port=8000)
