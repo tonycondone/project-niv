@@ -18,6 +18,7 @@ export function Controls({ onRefresh, onExport, onToggleFlowChart, loading }: Co
           onClick={onRefresh}
           disabled={loading}
           className="bg-primary-500 hover:bg-primary-600"
+          data-testid="refresh-button"
         >
           <RefreshCw className="h-4 w-4 mr-2" />
           Refresh Data
@@ -27,6 +28,7 @@ export function Controls({ onRefresh, onExport, onToggleFlowChart, loading }: Co
           onClick={onExport}
           variant="outline"
           disabled={loading}
+          data-testid="export-button"
         >
           <Download className="h-4 w-4 mr-2" />
           Export Data
@@ -36,6 +38,7 @@ export function Controls({ onRefresh, onExport, onToggleFlowChart, loading }: Co
           onClick={onToggleFlowChart}
           variant="outline"
           disabled={loading}
+          data-testid="flow-button"
         >
           <Workflow className="h-4 w-4 mr-2" />
           Process Flow
@@ -44,6 +47,7 @@ export function Controls({ onRefresh, onExport, onToggleFlowChart, loading }: Co
         <Button 
           variant="outline"
           disabled={loading}
+          data-testid="upload-button"
         >
           <Upload className="h-4 w-4 mr-2" />
           Upload Data

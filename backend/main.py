@@ -3,7 +3,7 @@ PROJECT NIV - FastAPI Backend
 Professional Data Analysis & Visualization Platform
 """
 
-from fastapi import FastAPI, HTTPException, Query
+from fastapi import FastAPI, HTTPException, Query, UploadFile, File
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse, JSONResponse
 import pandas as pd
@@ -568,6 +568,99 @@ async def get_etl_data():
 
     except Exception as e:
         logger.error(f"Error getting ETL data: {str(e)}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@app.post("/api/upload-csv")
+async def upload_csv(file: UploadFile = File(...)):
+    """Upload a CSV file, store it, and run ETL on it."""
+    try:
+        uploads_dir = os.path.join(DEFAULT_DATA_DIR, "uploads")
+        os.makedirs(uploads_dir, exist_ok=True)
+
+        timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+        safe_name = os.path.basename(file.filename or "uploaded.csv")
+        saved_path = os.path.join(uploads_dir, f"{timestamp}_{safe_name}")
+
+        content = await file.read()
+        with open(saved_path, "wb") as f:
+            f.write(content)
+
+        results = etl_processor.run_full_etl(saved_path)
+        return {
+            "success": True,
+            "message": "Upload and ETL completed successfully",
+            "results": results,
+        }
+    except Exception as e:
+        logger.error(f"Error uploading CSV: {str(e)}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@app.post("/api/apply-filters")
+async def apply_filters(percentage: float = Query(0.5)):
+    """Apply a simple row-percentage filter to the current dataset.
+    If no data is loaded, attempt to load sample data automatically.
+    """
+    try:
+        if etl_processor.raw_data is None:
+            # Load sample data to enable filtering
+            sample_files = [
+                os.path.join(DEFAULT_DATA_DIR, "sample_detailed.csv"),
+                os.path.join(DEFAULT_DATA_DIR, "sample.csv"),
+            ]
+            for sample_file in sample_files:
+                if os.path.exists(sample_file):
+                    etl_processor.extract(sample_file)
+                    break
+            else:
+                raise HTTPException(status_code=400, detail="No data available to filter")
+
+        df = etl_processor.raw_data.copy()
+        # Reduce rows by percentage deterministically
+        rows = max(1, int(len(df) * max(0.0, min(1.0, percentage))))
+        filtered = df.head(rows)
+        filtered = etl_processor._clean_data(filtered)
+        etl_processor.filtered_data = filtered
+        etl_processor.etl_metadata["filtering"] = {
+            "strategy": "row_head_percentage",
+            "percentage": percentage,
+            "rows_before": len(df),
+            "rows_after": len(filtered),
+            "timestamp": datetime.now().isoformat(),
+        }
+
+        # Build response similar to /api/etl-data
+        chart_configs: Dict[str, Any] = {}
+        for chart_type in ["line", "bar", "area", "pie"]:
+            try:
+                chart_configs[chart_type] = etl_processor.generate_apexcharts_config(
+                    chart_type
+                )
+            except Exception as exc:
+                logger.warning(f"Could not generate {chart_type} chart: {str(exc)}")
+
+        response = {
+            "chart_configs": chart_configs,
+            "charts": chart_configs,
+            "processed_data": filtered.head(50).to_dict(orient="records"),
+            "flow_data": etl_processor.create_flow_chart_data(),
+            "summary": {
+                "original_rows": len(etl_processor.raw_data)
+                if etl_processor.raw_data is not None
+                else 0,
+                "processed_rows": len(etl_processor.filtered_data)
+                if etl_processor.filtered_data is not None
+                else 0,
+                "columns": len(etl_processor.filtered_data.columns)
+                if etl_processor.filtered_data is not None
+                else 0,
+            },
+            "metadata": etl_processor.etl_metadata,
+        }
+        return response
+    except Exception as e:
+        logger.error(f"Error applying filters: {str(e)}")
         raise HTTPException(status_code=500, detail=str(e))
 
 
