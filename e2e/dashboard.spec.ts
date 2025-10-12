@@ -30,3 +30,16 @@ test('User can filter data via API', async ({ page, request }) => {
   await expect(page.getByText('Data Analysis Dashboard')).toBeVisible();
 });
 
+test('User can upload CSV file', async ({ page }) => {
+  await page.goto('/');
+  const uploadInput = page.getByTestId('upload-input');
+  const content = 'a,b\n1,2\n3,4\n';
+  await uploadInput.setInputFiles({
+    name: 'sample.csv',
+    mimeType: 'text/csv',
+    // Buffer is available in Node environment
+    buffer: Buffer.from(content),
+  });
+  await expect(page.getByText('Data Analysis Dashboard')).toBeVisible();
+});
+

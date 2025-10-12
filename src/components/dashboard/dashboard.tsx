@@ -80,6 +80,23 @@ export function Dashboard() {
     }
   };
 
+  const uploadData = async (file: File) => {
+    try {
+      const form = new FormData();
+      form.append('file', file);
+      const response = await fetch('/api/backend/upload-csv', {
+        method: 'POST',
+        body: form,
+      });
+      if (!response.ok) {
+        throw new Error('Upload failed');
+      }
+      await loadETLData();
+    } catch (error) {
+      setError(error instanceof Error ? error.message : 'Failed to upload data');
+    }
+  };
+
   const toggleFlowChart = () => {
     setFlowChartVisible(!flowChartVisible);
   };
@@ -118,6 +135,7 @@ export function Dashboard() {
             onRefresh={refreshCharts}
             onExport={exportData}
             onToggleFlowChart={toggleFlowChart}
+            onUpload={uploadData}
             loading={loading}
           />
           {flowChartVisible && <FlowChart flowData={etlData.flow_data} />}
