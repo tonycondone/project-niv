@@ -587,6 +587,10 @@ async def upload_csv(file: UploadFile = File(...)):
             f.write(content)
 
         results = etl_processor.run_full_etl(saved_path)
+        # Basic validation: ensure we have some processed rows and columns
+        summary = results.get("summary", {})
+        if not summary or summary.get("processed_rows", 0) <= 0 or summary.get("columns", 0) <= 0:
+            raise HTTPException(status_code=400, detail="Invalid or empty CSV uploaded")
         return {
             "success": True,
             "message": "Upload and ETL completed successfully",
@@ -787,6 +791,9 @@ async def export_data(fmt: str = Query("csv", alias="format")):
             raise HTTPException(
                 status_code=400, detail="Unsupported format. Use csv, json, or excel."
             )
+    except HTTPException as e:
+        # Re-raise HTTP errors as-is
+        raise e
     except Exception as e:
         logger.error(f"Error exporting data: {str(e)}")
         raise HTTPException(status_code=500, detail=str(e))

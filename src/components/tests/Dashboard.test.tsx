@@ -27,4 +27,13 @@ describe('Dashboard', () => {
       expect(screen.getByText(/Data Analysis Dashboard/i)).toBeInTheDocument()
     );
   });
+
+  it('handles fetch failure gracefully', async () => {
+    // @ts-expect-error override
+    global.fetch = jest.fn(() => Promise.resolve({ ok: false, status: 500, statusText: 'Server Error' }));
+    render(<Dashboard />);
+    await waitFor(() =>
+      expect(screen.getByText(/Error Loading Data/i)).toBeInTheDocument()
+    );
+  });
 });
